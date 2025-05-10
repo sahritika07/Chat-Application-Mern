@@ -47,33 +47,54 @@ export const signup = async (req, res) => {
   }
 };
 
+import bcrypt from "bcryptjs";
+import User from "../models/User.js";
+import generateToken from "../utils/generateToken.js"; // Make sure this sets the cookie in `res`
+
 export const login = async (req, res) => {
+  console.log("Login request received");
+  console.log("Request body:", req.body);
+
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    console.log("Email or password missing");
+    return res.status(400).json({ message: "Please provide both email and password" });
+  }
+
   try {
     const user = await User.findOne({ email });
+    console.log("User found:", user);
 
     if (!user) {
+      console.log("User not found with email:", email);
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    console.log("Password match:", isPasswordCorrect);
+
     if (!isPasswordCorrect) {
+      console.log("Incorrect password for email:", email);
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    generateToken(user._id, res);
+    console.log("Generating token...");
+    generateToken(user._id, res); // Ensure this sets a cookie correctly
 
-    res.status(200).json({
+    console.log("Sending response...");
+    return res.status(200).json({
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
       profilePic: user.profilePic,
     });
   } catch (error) {
-    console.log("Error in login controller", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error("Error in login controller:", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 export const logout = (req, res) => {
   try {
