@@ -47,9 +47,7 @@ export const signup = async (req, res) => {
   }
 };
 
-import bcrypt from "bcryptjs";
-import User from "../models/User.js";
-import generateToken from "../utils/generateToken.js"; // Make sure this sets the cookie in `res`
+
 
 export const login = async (req, res) => {
   console.log("Login request received");
